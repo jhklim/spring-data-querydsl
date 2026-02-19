@@ -1,6 +1,5 @@
 package study.querydsl;
 
-import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -136,4 +135,23 @@ public class QueryBasicTest {
         assertThat(result.get(1).getUsername()).isEqualTo("member6");
         assertThat(result.get(2).getUsername()).isNull();
     }
+
+    @Test
+    public void paging() {
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .orderBy(member.username.desc())
+                .offset(1)
+                .limit(2)
+                .fetch();
+
+        Long total = queryFactory
+                .select(member.count())
+                .from(member)
+                .fetchOne();
+
+        assertThat(total).isEqualTo(4);
+        assertThat(result.size()).isEqualTo(2);
+    }
+
 }
