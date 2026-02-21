@@ -3,7 +3,6 @@ package study.querydsl;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -643,4 +642,52 @@ public class QueryBasicTest {
 
         return username.and(age);
     }
+
+    @Test
+    public void bulkUpdate() {
+
+        // member1(10) -> DB: member1
+        // member2(20) -> DB: member2
+        // member3(30) -> DB: member3
+        // member4(40) -> DB: member4
+
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+
+        // member1(10) -> DB: 비회원
+        // member2(20) -> DB: 비회원
+        // member3(30) -> DB: member3
+        // member4(40) -> DB: member4
+
+        em.flush();
+        em.clear();
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .fetch();
+
+        for (Member member1 : result) {
+            System.out.println("member1 = " + member1);
+        }
+    }
+
+    @Test
+    public void bulkAdd() {
+        long count = queryFactory
+                .update(member)
+                .set(member.age, member.age.add(1))
+                .execute();
+    }
+
+    @Test
+    public void bulkDelete() {
+        long count = queryFactory
+                .delete(member)
+                .where(member.age.gt(18))
+                .execute();
+    }
+
 }
